@@ -1,7 +1,16 @@
 - hosts: webserver
-  become: yes
-  become_method: sudo
-  connection: local
+  gather_facts: False
+
+  pre_tasks:
+    - name: check the status of minikube.
+      command: minikube status
+      register: minikube_status
+      changed_when: false
+      ignore_errors: true
+
+    - name: start minikube if it's not running.
+      command: minikube start --vm = true
+      when: "not minikube_status.stdout or 'Running' not in minikube_status.stdout"
 
   tasks:
     - name: Get stuff from git
@@ -9,11 +18,39 @@
        repo: https://github.com/liphinstanley/Adjust
        dest: /tmp/web_app/
 
-    - name: Build webapp image
-      ansible.builtin.command:
-        cmd: docker build -t adjust_webapp /tmp/web_app/docker
-    
-    - name: install webapp helm chart
-      ansible.builtin.command:
-        cmd: helm install web_app /tmp/web_app/helmcharts/web-app 
+    - name: get existing image hash.
+      shell: |
+        eval $(minikube docker-env)
+        docker images -q {{ image_name }}
+      register: image_hash
+      changed_when: false
 
+    - name: build image if it's not already built. 
+      shell: | 
+        eval $(minikube docker-env)
+        docker build -t {{ image_name }} /tmp/web_app/docker
+      when: not image_hash.stdout
+
+    - name: install webapp helm chart
+      shell: |
+        helm install web-app /tmp/web_app/helmcharts/web-app 
+  
+  post_tasks:
+
+    - name: exposing web-app the host via Minikube.
+      command: minikube service web-app --url
+      changed_when: false
+      register: minikube_service
+
+    - debug:
+        msg: "Web-App URL: {{ minikube_service['stdout_lines'][0] }}"
+
+    - name: verify web-app is responding.
+      uri:
+        url: "{{ minikube_service['stdout_lines'][0] }}/healthcheck"
+        return_content: true
+      register: web_app_response
+      failed_when: "'/healthcheck' not in hello_go_response.content"
+
+    - debug:
+        msg: "Testing URL Web App Requested: {{web_app_response.content}} Status: {{web_app_response.status}}"

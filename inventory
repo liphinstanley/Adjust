@@ -2,5 +2,6 @@
 127.0.0.1
 
 [webserver:vars]
+ansible_connection=local
 ansible_python_interpreter=/opt/homebrew/bin/python3
-
+image_name=adjust-webapp
