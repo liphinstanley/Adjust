@@ -8,13 +8,12 @@
       git:
        repo: https://github.com/liphinstanley/Adjust
        dest: /tmp/web_app/
-      delegate_to: localhost
 
     - name: Build webapp image
       ansible.builtin.command:
-        cmd: cd /tmp/web_app/docker && docker build -t adjust_webapp .
+        cmd: docker build -t adjust_webapp /tmp/web_app/docker
     
     - name: install webapp helm chart
       ansible.builtin.command:
-        cmd: cd /tmp/web_app/web-app/helmchart && helm install web_app . 
+        cmd: helm install web_app /tmp/web_app/helmcharts/web-app 
 

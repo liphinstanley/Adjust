@@ -4,27 +4,26 @@ This repository basically helps you to deploy an App written in Ruby to recieve 
 # Overview
 The App which is written in Ruby will create a web server that listens to a specified port and serve the requests coming to it depends on the routing added to the application. The App here is a containerized one and it would listen to the port 80 in the container, when the path http://hostname:30001/ is requested. Note that the URL changes depends how we expose the app to the outside world or within kubernetes itself.
 
-#Technologies
-*minikube version v1.19.0
-*Helm version v3.5.4
-*Docker engine version 20.10.5-ce
-*ruby version 3.0.1p64
-*Ansible 2.10.9
+# Technologies
+* minikube version v1.19.0
+* Helm version v3.5.4
+* Docker engine version 20.10.5-ce
+* ruby version 3.0.1p64
+* Ansible 2.10.9
 
-#Prerequisites
+# Prerequisites
 In order to run and test the App on your local machine we need the below tools installed on your local machine depends on your Operating System flavor.
 
 1. Install VirtualBox on your local machine which is necessary for running minikube, for apple silicon machines VirtualBox is not supported at the moment and you can use docker as minikube driver. feel free to skip the steps if you are already having minikube instaleld and running. Refer the link below for VirtualBox downloads: https://www.virtualbox.org/wiki/Downloads
 
 2. Download and install docker desktop as we are using docker environment set up to run k8s and test the application, follow the link below for the same. https://docs.docker.com/desktop/
 
-3. Download and install the Ansible for running playbook automation. follow the link for ansible installtion https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+3. Download and install the Ansible for running onestep deployment playbook. follow the link for ansible installtion https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
 
 4. Download and install helm which is a package manager for k8s and helps to make the deployment of apps on kubernetes easy. Install helm from the below link. https://helm.sh/docs/intro/install/
 
-#Installation
-The repository contains all the necessary app files, kubernetes manisfests, helmcharts and Dockerfile to make the deployment easy. The Dockerfile will build and package the application will give us the required docker image to run on kubernetes. It's a multi stage Dockerfile which actually reduces the complexity and size of the final image.
-Ansible playbook is used for onestep installtion method for docker building and helm chart installing. Follow the steps below to run the app on kubernetes environment powered by minikube.
+# Installation
+The repository contains all the necessary Dockerfile, helmcharts and Ansible playbook to make the deployment easy.The Ansible playbook is used for onestep installtion method for docker building and helm chart installation for the ruby web application. Follow the steps below to run the app on kubernetes environment powered by minikube.
 
 1. Open the terminal and run the below command to clone the repository to the local machine.
 ```
@@ -52,8 +51,8 @@ curl http://<host-IP-address>:nodePort/healthcheck
 curl http://<host-IP-address>:nodePort/
 ```
 The desired output is shown below,
- ```
- ❯ kubectl get pods
+```
+❯ kubectl get pods
 NAME                      READY   STATUS    RESTARTS   AGE
 web-app-75c975b45-wvd5q   1/1     Running   0          11h
 ❯ kubectl get svc
@@ -69,9 +68,10 @@ minikube service web-app --url
 |-----------|---------|-------------|------------------------|
 http://127.0.0.1:59653
 
- ❯ curl http://127.0.0.1:59653/healthcheck
-OK%                                                                                                                                                                               ❯ curl http://127.0.0.1:59653/
-Well, hello there!% 
+❯ curl http://127.0.0.1:59653/healthcheck
+OK%
+❯ curl http://127.0.0.1:59653/
+Well, hello there!%
 ```
-Since the test minikube M1 silicon has networking limitations of driver docker on darwin OS, ingress addon is not supported. nodePort 30001 is enabled but ingress wasn't able to test.
+Since the test was done on minikube M1 silicon and it has networking limitations of driver docker on darwin OS, minikube ingress addon is not supported. nodePort 30001 is enabled but ingress wasn't able to test.
 
