@@ -39,7 +39,9 @@ minikube start — driver=docker
 eval $(minikube docker-env)
 ```
 4. Install the app using the below Ansible command from /Adjust
+```
 ansible-playbook -i inventory playbook.yml --connection=local
+```
 The web-app is exposed as a NodePort service so that we can access it from the local machine, using command line or using web browser. The following command will give you the URL that the service is exposed to:
 ```
 minikube service web-app --url
