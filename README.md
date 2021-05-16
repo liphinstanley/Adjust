@@ -29,22 +29,13 @@ The repository contains all the necessary Dockerfile, helmcharts and Ansible pla
 ```
 git clone https://github.com/liphinstanley/Adjust.git
 ```
-2. Start the minikube service on the local machine using the Virtualbox as driver. The command may change according to the flavor of your operating system. (This commands were tested using a Mac M1 silicon machine at the time of development)
-```
-minikube start — driver=docker
-```
-3. Run the below command so that the minikube will be able to use the Docker daemon inside the minikube instance. This is required because we are using all development operations locally and this enables to load the docker image from the local machine itself. The imagePullPolicy: Never in the deployment manifest of App triggers the same.
-```
-eval $(minikube docker-env)
-```
-4. Install the app using the below Ansible command from /Adjust
+2. Install the app using the below Ansible command from /Adjust
 ```
 ansible-playbook -i inventory playbook.yml --connection=local
 ```
-The web-app is exposed as a NodePort service so that we can access it from the local machine, using command line or using web browser. The following command will give you the URL that the service is exposed to:
-```
-minikube service web-app --url
-```
+
+The Ansible playbook check the minikube cluster in host machine and starts cluste if not in running state using the Virtualbox as driver.The command may change according to the flavor of your operating system. ( Apple silicon machine users edit the playbook to use docker as driver as Virtualbox driver not supportednow). playbook builds a Ruby web-app docker and deploy it to minukube cluster using helm. The web-app is exposed as a NodePort service so that we can access it from the local machine, using command line or using web browser. 
+The following command will give you the URL that the service is exposed to:
 According to the app, the route hostname/healthcheck will return "OK" result and hostname/ will return "Well, hello there!" Use the command below to test the application using a curl command.
 ```
 curl http://<host-IP-address>:nodePort/healthcheck
@@ -73,5 +64,4 @@ OK%
 ❯ curl http://127.0.0.1:59653/
 Well, hello there!%
 ```
-Since the test was done on minikube M1 silicon and it has networking limitations of driver docker on darwin OS, minikube ingress addon is not supported. nodePort 30001 is enabled but ingress wasn't able to test.
 
