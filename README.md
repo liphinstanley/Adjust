@@ -73,7 +73,8 @@ http://webapp.mydomain.com/
 Well, hello there !
 ```
 
-Alternetively for apple silicoon users ingress addon will not work currently and you can use below minikube local tunne method for testing. 
+Alternetively for apple silicon users ingress addon will not work currently and you can use below minikube local tunne method for testing. 
+This test scenario is added as a post task in ansible playbook.
 ```
 minikube service web-app --url
 🏃  Starting tunnel for service web-app.
