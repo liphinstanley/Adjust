@@ -2,7 +2,7 @@
 This repository basically helps you to deploy an App written in Ruby to recieve and serve http requests on kubernetes. We use the minukube tool to deploy and test the application. Minikube is a tool that helps us to run the kubernetes cluster on the local machine. It's a single node kubernetes cluster that helps the local development of applications and k8 objects.
 
 # Overview
-The App which is written in Ruby will create a web server that listens to a specified port and serve the requests coming to it depends on the routing added to the application. The App here is a containerized one and it would listen to the port 80 in the container, when the path http://hostname:30001/ is requested. Note that the URL changes depends how we expose the app to the outside world or within kubernetes itself.
+The App which is written in Ruby will create a web server that listens to a specified port and serve the requests coming to it depends on the routing added to the application. The App here is a containerized one and it would listen to the port 80 in the container, when the path http://webapp.mydomain.com is requested. Note that the URL changes depends how we expose the app to the outside world or within kubernetes itself.
 
 # Technologies
 * minikube version v1.19.0
@@ -33,23 +33,48 @@ git clone https://github.com/liphinstanley/Adjust.git
 ```
 ansible-playbook -i inventory playbook.yml --connection=local
 ```
+3. Update the /etc/hosts file with the hostname webapp.mydomain.com resolving to minikube IP
+   Get the minikube ip with command, 
+   ```
+   minikube ip
+   192.168.64.3
+   ```
 
-The Ansible playbook check the minikube cluster in host machine and starts cluste if not in running state using the Virtualbox as driver.The command may change according to the flavor of your operating system. ( Apple silicon machine users edit the playbook to use docker as driver as Virtualbox driver not supportednow). playbook builds a Ruby web-app docker and deploy it to minukube cluster using helm. The web-app is exposed as a NodePort service so that we can access it from the local machine, using command line or using web browser. 
-The following command will give you the URL that the service is exposed to:
+The Ansible playbook check the minikube cluster in host machine and starts cluste if not in running state using the Virtualbox as driver.The command may change according to the flavor of your operating system. (Apple silicon machine users edit the playbook to use docker as driver as Virtualbox driver not supported now). Playbook builds a Ruby web-app docker image and deploy it to minukube cluster using helm. An Ingress object is created for the external access of the web-app using a web browser. 
+The URL that the service is exposed to:
 According to the app, the route hostname/healthcheck will return "OK" result and hostname/ will return "Well, hello there!" Use the command below to test the application using a curl command.
 ```
 curl http://<host-IP-address>:nodePort/healthcheck
 curl http://<host-IP-address>:nodePort/
 ```
+
 The desired output is shown below,
+
 ```
 ❯ kubectl get pods
 NAME                      READY   STATUS    RESTARTS   AGE
 web-app-75c975b45-wvd5q   1/1     Running   0          11h
+
 ❯ kubectl get svc
 NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
 kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP        2d15h
 web-app      NodePort    10.102.167.101   <none>        80:30001/TCP   11h
+
+❯ kubectl get ing
+NAME      CLASS    HOSTS                 ADDRESS        PORTS   AGE
+web-app   <none>   webapp.mydomain.com   192.168.64.3   80      4m59s
+```
+
+# Web browser output
+```
+http://webapp.mydomain.com/healthcheck
+OK
+http://webapp.mydomain.com/
+Well, hello there !
+```
+
+Alternetively for apple silicoon users ingress addon will not work currently and you can use below minikube local tunne method for testing. 
+```
 minikube service web-app --url
 🏃  Starting tunnel for service web-app.
 |-----------|---------|-------------|------------------------|

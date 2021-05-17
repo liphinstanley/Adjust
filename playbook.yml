@@ -30,6 +30,10 @@
         eval $(minikube docker-env)
         docker build -t {{ image_name }} /tmp/web_app/docker
       when: not image_hash.stdout
+   
+    - name: enable Nginx ingress controller for minikube
+      shell: |
+        minikube addons enable ingress
 
     - name: install webapp helm chart
       shell: |
